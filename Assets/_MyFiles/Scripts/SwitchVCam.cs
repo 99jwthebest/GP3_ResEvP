@@ -16,6 +16,8 @@ public class SwitchVCam : MonoBehaviour
     private CinemachineVirtualCamera virtualCamera;
     private InputAction aimAction;
 
+    [SerializeField] DeactivateRig deactivateRig;
+    [SerializeField] DeactivateChestRig deactivateChestRig;
     private void Awake()
     {
         virtualCamera = GetComponent<CinemachineVirtualCamera>();
@@ -39,6 +41,8 @@ public class SwitchVCam : MonoBehaviour
         virtualCamera.Priority += priorityBoostAmount;
         aimCanvas.enabled = true;
         thirdPersonCanvas.enabled = false;
+        deactivateRig.startRig();
+        deactivateChestRig.startRig();
     }
 
     private void CancelAim()
@@ -46,5 +50,7 @@ public class SwitchVCam : MonoBehaviour
         virtualCamera.Priority -= priorityBoostAmount;
         aimCanvas.enabled = false;
         thirdPersonCanvas.enabled = true;
+        deactivateRig.stopRig();
+        deactivateChestRig.stopRig();
     }
 }

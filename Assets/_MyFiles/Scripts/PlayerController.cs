@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
 using UnityEngine.Windows;
 
@@ -12,7 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float gravityValue = -9.81f;
     [SerializeField]
-    private float rotationSpeed = 3f;
+    private float aimRotationSpeed = 10f;
     [SerializeField]
     private GameObject bulletPrefab;
     [SerializeField]
@@ -26,6 +27,12 @@ public class PlayerController : MonoBehaviour
     private float animationSmoothTime = 0.1f;
     [SerializeField]
     private float animationPlayTransition = 0.15f;
+    [SerializeField]
+    private Transform aimTarget;
+    [SerializeField]
+    private float aimDistance = 1f;
+    [SerializeField]
+    private Vector3 addingForAim;
 
     ///Stuff below is stuff I added without the video
     public bool characterRotateWithCam = false;
@@ -49,11 +56,15 @@ public class PlayerController : MonoBehaviour
 
     private Animator animator;
     int jumpAnimation;
+    int recoilAnimation;
+
     int moveXAnimationParameterID;
     int moveZAnimationParameterID;
 
     Vector2 currentAnimationBlendVector;
     Vector2 animationVelocity;
+
+    [SerializeField] RecoilShake recoilShake;
 
 
     private void Awake()  //awake happens before onEnable and then after that it's start
@@ -70,6 +81,7 @@ public class PlayerController : MonoBehaviour
         // Animations
         animator = GetComponent<Animator>();
         jumpAnimation = Animator.StringToHash("PistolJump");
+        recoilAnimation = Animator.StringToHash("PistolShootRecoil");
         moveXAnimationParameterID = Animator.StringToHash("MoveX");
         moveZAnimationParameterID = Animator.StringToHash("MoveZ");
 
@@ -85,6 +97,11 @@ public class PlayerController : MonoBehaviour
         shootAction.performed -= _ => ShootGun();
     }
 
+    /// <summary>
+    /// Spawn a bullet and shoot in the direction of the gun barrel. If the raycast hits the environment,
+    /// the bullet travels towards to point of contact, else it will not have a target and be destroyed
+    /// at a certain distance away from the player.
+    /// </summary>
     private void ShootGun()
     {
         RaycastHit hit;
@@ -105,11 +122,19 @@ public class PlayerController : MonoBehaviour
             bulletController.target = cameraTransform.position + cameraTransform.forward * bulletHitMissDistance;
             bulletController.hit = false;
         }
+        animator.CrossFade(recoilAnimation, animationPlayTransition);
+        //CinemachineShake.Instance.ShakeCamera(1f, .25f);  ****this is for melee, Maybe
+        recoilShake.ScreenShake();
     }
 
     void Update()
     {
+        aimTarget.position = cameraTransform.position + cameraTransform.forward * aimDistance;
+
+        aimTarget.localPosition += addingForAim;
+
         groundedPlayer = controller.isGrounded;
+        // If the player is on the ground, there is no need to apply a downwards force.
         if (groundedPlayer && playerVelocity.y < 0)
         {
             playerVelocity.y = 0f;
@@ -142,13 +167,13 @@ public class PlayerController : MonoBehaviour
         // in other words, Leon rotates faster along with the camera when aiming but when walking, he rotates slower.
         // When runnning, I want to be able to use the "else" statement in the UpdateTargetDirection()
         // Rotate towards camera direction.
-        float targetAngle = cameraTransform.eulerAngles.y;
+        /*float targetAngle = cameraTransform.eulerAngles.y;
         Quaternion targetRotation = Quaternion.Euler(0, targetAngle, 0);
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, aimRotationSpeed * Time.deltaTime);
+        */
 
 
-        /*UpdateTargetDirection();
+        UpdateTargetDirection();
         if (input != Vector2.zero && targetDirection.magnitude > 0.1f)
         {
             Vector3 lookDirection = targetDirection.normalized;
@@ -160,7 +185,7 @@ public class PlayerController : MonoBehaviour
             var euler = new Vector3(0, eulerY, 0);
 
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(euler), turnSpeed * turnSpeedMultiplier * Time.deltaTime);
-        }*/
+        }
         
     }
 
