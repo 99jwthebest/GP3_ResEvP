@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ZombieAI : MonoBehaviour
 {
+    public float health = 100;
     public static ZombieAI Instance;
 
     public GameObject Target;

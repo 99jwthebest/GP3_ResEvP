@@ -33,7 +33,7 @@ public class ScoreSystem : MonoBehaviour
 
     public void AddScore()
     {
-        currentScore += 100;
+        currentScore += 200;
         currentScoreText.text = "Score: " + currentScore;
 
         zombiesKilled += 1;

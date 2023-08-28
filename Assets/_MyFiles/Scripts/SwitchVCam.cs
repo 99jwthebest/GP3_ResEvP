@@ -18,6 +18,7 @@ public class SwitchVCam : MonoBehaviour
 
     [SerializeField] DeactivateRig deactivateRig;
     [SerializeField] DeactivateChestRig deactivateChestRig;
+    [SerializeField] PlayerController playerController;
     private void Awake()
     {
         virtualCamera = GetComponent<CinemachineVirtualCamera>();
@@ -43,6 +44,7 @@ public class SwitchVCam : MonoBehaviour
         thirdPersonCanvas.enabled = false;
         deactivateRig.startRig();
         deactivateChestRig.startRig();
+        playerController.characterRotateWithCam = true;
     }
 
     private void CancelAim()
@@ -52,5 +54,7 @@ public class SwitchVCam : MonoBehaviour
         thirdPersonCanvas.enabled = true;
         deactivateRig.stopRig();
         deactivateChestRig.stopRig();
+        playerController.characterRotateWithCam = false;
+
     }
 }

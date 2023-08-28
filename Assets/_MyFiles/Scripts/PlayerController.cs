@@ -7,7 +7,11 @@ using UnityEngine.Windows;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField]
-    private float playerSpeed = 2.0f;
+    private float playerWalkSpeed = 2.0f;
+    [SerializeField]
+    private float playerAimWalkSpeed = 2.0f;
+    [SerializeField]
+    private float playerSprintSpeed = 7.0f;
     [SerializeField]
     private float jumpHeight = 1.0f;
     [SerializeField]
@@ -53,6 +57,7 @@ public class PlayerController : MonoBehaviour
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction shootAction;
+    private InputAction sprintAction;
 
     private Animator animator;
     int jumpAnimation;
@@ -63,8 +68,11 @@ public class PlayerController : MonoBehaviour
 
     Vector2 currentAnimationBlendVector;
     Vector2 animationVelocity;
+    Vector3 move;
 
     [SerializeField] RecoilShake recoilShake;
+
+    public float damageAmount;
 
 
     private void Awake()  //awake happens before onEnable and then after that it's start
@@ -76,6 +84,7 @@ public class PlayerController : MonoBehaviour
         moveAction = playerInput.actions["Move"];
         jumpAction = playerInput.actions["Jump"];
         shootAction = playerInput.actions["Shoot"];
+        sprintAction = playerInput.actions["Sprint"];
         // Lock the cursor to the middle of the screen.
         Cursor.lockState = CursorLockMode.Locked;
         // Animations
@@ -112,9 +121,26 @@ public class PlayerController : MonoBehaviour
             bulletController.target = hit.point;
             bulletController.hit = true;
 
-            if (hit.collider.CompareTag("Enemy"))
+            //checkHIT(hit);
+
+            if (hit.collider.CompareTag("EnemyHead"))
             {
+                Debug.Log("hit HEAD!!");
+
+                //ZombieAI.Instance.EnemyDie();
+            }
+            if (hit.collider.CompareTag("EnemyBody"))
+            {
+                Debug.Log("hit BODY!!");
+
+                //ZombieAI.Instance.EnemyDie();
+
+            }
+            if (hit.collider.CompareTag("EnemyArms"))
+            {
+                Debug.Log("hit ARMS!!");
                 ZombieAI.Instance.EnemyDie();
+
             }
         }
         else
@@ -142,12 +168,23 @@ public class PlayerController : MonoBehaviour
 
         input = moveAction.ReadValue<Vector2>();
         currentAnimationBlendVector = Vector2.SmoothDamp(currentAnimationBlendVector, input, ref animationVelocity, animationSmoothTime);
-        Vector3 move = new Vector3(currentAnimationBlendVector.x, 0, currentAnimationBlendVector.y);
+        move = new Vector3(currentAnimationBlendVector.x, 0, currentAnimationBlendVector.y);
         // Take into account the camera direction when moving the player.
         move = move.x * cameraTransform.right.normalized + move.z * cameraTransform.forward.normalized; //Maybe make this work for when you want to aim but not work when not aiming
         move.y = 0f;
 
-        controller.Move(move * Time.deltaTime * playerSpeed);
+        //controller.Move(move * Time.deltaTime * playerWalkSpeed);
+        if(sprintAction.IsPressed() && !characterRotateWithCam) 
+        {
+            controller.Move(move * Time.deltaTime * playerSprintSpeed);
+
+        }
+        else
+        {
+            controller.Move(move * Time.deltaTime * playerWalkSpeed);
+
+        }
+
         // Blend Strafe Animation.
         animator.SetFloat(moveXAnimationParameterID, currentAnimationBlendVector.x);
         animator.SetFloat(moveZAnimationParameterID, currentAnimationBlendVector.y);
@@ -167,40 +204,21 @@ public class PlayerController : MonoBehaviour
         // in other words, Leon rotates faster along with the camera when aiming but when walking, he rotates slower.
         // When runnning, I want to be able to use the "else" statement in the UpdateTargetDirection()
         // Rotate towards camera direction.
-        /*float targetAngle = cameraTransform.eulerAngles.y;
-        Quaternion targetRotation = Quaternion.Euler(0, targetAngle, 0);
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, aimRotationSpeed * Time.deltaTime);
-        */
+        
 
-
+        
         UpdateTargetDirection();
-        if (input != Vector2.zero && targetDirection.magnitude > 0.1f)
-        {
-            Vector3 lookDirection = targetDirection.normalized;
-            freeRotation = Quaternion.LookRotation(lookDirection, transform.up);
-            var diferenceRotation = freeRotation.eulerAngles.y - transform.eulerAngles.y;
-            var eulerY = transform.eulerAngles.y;
-
-            if (diferenceRotation < 0 || diferenceRotation > 0) eulerY = freeRotation.eulerAngles.y;
-            var euler = new Vector3(0, eulerY, 0);
-
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(euler), turnSpeed * turnSpeedMultiplier * Time.deltaTime);
-        }
         
     }
 
 
-    public virtual void UpdateTargetDirection()
+    public void UpdateTargetDirection()
     {
-        if (!characterRotateWithCam)
+        if (characterRotateWithCam)
         {
-            turnSpeedMultiplier = 0.2f;
-            var forward = transform.TransformDirection(Vector3.forward);
-            forward.y = 0;
-
-            //get the right-facing direction of the referenceTransform
-            var right = transform.TransformDirection(Vector3.right);
-            targetDirection = input.x * right + Mathf.Abs(input.y) * forward;
+            float targetAngle = cameraTransform.eulerAngles.y;
+            Quaternion targetRotation = Quaternion.Euler(0, targetAngle, 0);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, aimRotationSpeed * Time.deltaTime);
         }
         else
         {
@@ -213,6 +231,52 @@ public class PlayerController : MonoBehaviour
 
             // determine the direction the player will face based on input and the referenceTransform's right and forward directions
             targetDirection = input.x * right + input.y * forward;
+
+            // Ladder
+            float avoidFloorDistance = .1f;
+            float ladderGrabDistance = .4f;
+            Physics.Raycast(transform.position + Vector3.up * avoidFloorDistance, targetDirection, out RaycastHit raycastHit, ladderGrabDistance);
+           // Debug.Log(raycastHit.transform);
+            // Ladder
+
+            if (input != Vector2.zero && targetDirection.magnitude > 0.1f)
+            {
+                Vector3 lookDirection = targetDirection.normalized;
+                freeRotation = Quaternion.LookRotation(lookDirection, transform.up);
+                var diferenceRotation = freeRotation.eulerAngles.y - transform.eulerAngles.y;
+                var eulerY = transform.eulerAngles.y;
+
+                if (diferenceRotation < 0 || diferenceRotation > 0) eulerY = freeRotation.eulerAngles.y;
+                var euler = new Vector3(0, eulerY, 0);
+
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(euler), turnSpeed * turnSpeedMultiplier * Time.deltaTime);
+            }
         }
     }
+
+    public void startSprint()
+    {
+        controller.Move(move * Time.deltaTime * playerSprintSpeed);
+
+    }
+
+    public void endSprint()
+    {
+        controller.Move(move * Time.deltaTime * playerWalkSpeed);
+
+    }
+
+    /*private void checkHIT(RaycastHit hit)
+    {
+        takeDamageScript = hit.transform.GetComponent<takeDamage>();
+        switch (takeDamageScript.damageType)
+        {
+            case takeDamage.collisionType.head : takeDamageScript.HIT(damageAmount);
+                break;
+            case takeDamage.collisionType.body : takeDamageScript.HIT(damageAmount / 2);
+                break;
+            case takeDamage.collisionType.arms : takeDamageScript.HIT(damageAmount / 4);
+                break;
+        }
+    }*/
 }
