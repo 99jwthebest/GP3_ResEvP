@@ -4,22 +4,29 @@ using UnityEngine;
 
 public class takeDamage : MonoBehaviour
 {
-    public enum collisionType { head, body, arms}
-    public collisionType damageType;
+    public static takeDamage instance;
 
-    public void HIT(float value)
+    //public enum collisionType { head, body, arms}
+    //public collisionType damageType;
+
+    private void Awake()
     {
-        try
+        instance = this;
+    }
+
+    public void enemyTakeDamage(float value)
+    {
+        ZombieAI.Instance.health -= value;
+        if (ZombieAI.Instance.health <= 0 )
         {
-            ZombieAI.Instance.health -= value;
-            if (ZombieAI.Instance.health <= 0 )
-            {
-                ZombieAI.Instance.EnemyDie();
-            }
+            ZombieAI.Instance.EnemyDie();
+        }
+        /*try
+        {
         }
         catch 
         {
             Debug.Log("zombie is not connected with controller!!!.....");
-        }
+        }*/
     }
 }

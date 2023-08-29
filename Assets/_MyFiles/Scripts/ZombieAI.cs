@@ -7,7 +7,7 @@ public class ZombieAI : MonoBehaviour
     public float health = 100;
     public static ZombieAI Instance;
 
-    public GameObject Target;
+    private GameObject player;
     public float speed = 1.5f;
 
     private void Awake()
@@ -17,12 +17,13 @@ public class ZombieAI : MonoBehaviour
 
     void Start()
     {
+        player = GameObject.Find("Player");
         
     }
 
     void Update()
     {
-        transform.LookAt(Target.gameObject.transform);
+        transform.LookAt(player.gameObject.transform);
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
 

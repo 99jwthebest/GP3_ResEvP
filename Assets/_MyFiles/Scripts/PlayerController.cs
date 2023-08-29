@@ -72,7 +72,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] RecoilShake recoilShake;
 
-    public float damageAmount;
+    public float bulletDamageAmount;
 
 
     private void Awake()  //awake happens before onEnable and then after that it's start
@@ -126,21 +126,17 @@ public class PlayerController : MonoBehaviour
             if (hit.collider.CompareTag("EnemyHead"))
             {
                 Debug.Log("hit HEAD!!");
-
-                //ZombieAI.Instance.EnemyDie();
+                takeDamage.instance.enemyTakeDamage(bulletDamageAmount);
             }
             if (hit.collider.CompareTag("EnemyBody"))
             {
                 Debug.Log("hit BODY!!");
-
-                //ZombieAI.Instance.EnemyDie();
-
+                takeDamage.instance.enemyTakeDamage(bulletDamageAmount / 2);
             }
             if (hit.collider.CompareTag("EnemyArms"))
             {
                 Debug.Log("hit ARMS!!");
-                ZombieAI.Instance.EnemyDie();
-
+                takeDamage.instance.enemyTakeDamage(bulletDamageAmount / 4);
             }
         }
         else
