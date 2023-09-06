@@ -1,18 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class OpenDoorScript : MonoBehaviour
 {
     public GameObject openDoorText;
+    public TextMeshProUGUI priceOfDoorText;
+
     public GameObject animOpenDoor;
     public GameObject ThisTrigger;
     public AudioSource DoorOpenSound;
     public bool Action = false;
+    public int priceOfDoor;
 
     private void Start()
     {
         openDoorText.SetActive(false);
+        priceOfDoorText.text = "Press E to Open Door [Cost:" + priceOfDoor + "]";
     }
 
     private void OnTriggerEnter(Collider collision)
@@ -36,11 +41,19 @@ public class OpenDoorScript : MonoBehaviour
         {
             if(Action == true)
             {
-                openDoorText.SetActive(false);
-                animOpenDoor.GetComponent<Animator>().Play("OpenDoorAnim");
-                ThisTrigger.SetActive(false);
-                DoorOpenSound.Play();
-                Action = false;
+                if(ScoreSystem.instance.TotalMoney > priceOfDoor)
+                {
+                    openDoorText.SetActive(false);
+                    ScoreSystem.instance.spendMoney(priceOfDoor);
+                    animOpenDoor.GetComponent<Animator>().Play("OpenDoorAnim");
+                    ThisTrigger.SetActive(false);
+                    DoorOpenSound.Play();
+                    Action = false;
+                }
+                else
+                {
+                    Debug.Log("Don't have enough money!!!!!");
+                }
             }
         }
     }

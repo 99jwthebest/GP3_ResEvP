@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -12,10 +10,22 @@ public class ScoreSystem : MonoBehaviour
 
     int zombiesKilled;
 
+    [SerializeField]
+    private int startingMoney;
+
+    private int totalMoney;
+    public int TotalMoney
+    {
+       get { return totalMoney; }
+       private set { totalMoney = value; }
+    }
+
     public TextMeshProUGUI currentScoreText;
     //public TextMeshProUGUI highScoreText;
 
     public TextMeshProUGUI zombiesKilledText;
+
+    public TextMeshProUGUI moneyText;
 
     private void Awake()
     {
@@ -24,6 +34,9 @@ public class ScoreSystem : MonoBehaviour
 
     void Start()
     {
+        TotalMoney = startingMoney;
+        moneyText.text = "Money: " + TotalMoney;
+
         currentScore = 0;
         currentScoreText.text = "Score: " + currentScore;
 
@@ -31,14 +44,21 @@ public class ScoreSystem : MonoBehaviour
         zombiesKilledText.text = "Zombies Killed: " + zombiesKilled;
     }
 
-    public void AddScore()
+    public void AddScore(int sFromZomb)
     {
-        currentScore += 200;
+        currentScore += sFromZomb;
         currentScoreText.text = "Score: " + currentScore;
+
+        TotalMoney += sFromZomb;
+        moneyText.text = "Money: " + TotalMoney;
 
         zombiesKilled += 1;
         zombiesKilledText.text = "Zombies Killed: " + zombiesKilled;
+    }
 
-        CountdownTimer.Instance.AddTime();
+    public void spendMoney(int moneySpend)
+    {
+        TotalMoney -= moneySpend;
+        moneyText.text = "Money: " + TotalMoney;
     }
 }

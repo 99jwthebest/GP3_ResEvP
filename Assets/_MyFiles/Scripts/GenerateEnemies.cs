@@ -24,7 +24,7 @@ public class GenerateEnemies : MonoBehaviour
 
             Instantiate(zombie, randomPos, Quaternion.identity);
 
-            yield return new WaitForSeconds(.5f);
+            yield return new WaitForSeconds(5f);
             enemyCount++;
         }
     }

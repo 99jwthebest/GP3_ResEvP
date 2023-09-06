@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
-using UnityEngine.Windows;
+using TMPro;
 
 [RequireComponent(typeof(CharacterController), typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
@@ -72,7 +73,35 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] RecoilShake recoilShake;
 
+    // Gun System
     public float bulletDamageAmount;
+    public float timeBetweenShooting, spread, reloadTime, timeBetweenShots; // range;
+    public int magazineSize, bulletsPerTap;
+    public bool allowButtonHold;
+    int bulletsLeft, bulletsShot;
+
+    // bools
+    bool shooting, readyToShoot, reloading;
+
+    // Reference
+    /* public Camera fpsCam;
+     public Transform attackPoint;
+     public RaycastHit rayHit;
+     public LayerMask whatIsEnemy;
+
+    //Graphics
+    public GameObject muzzleFlash, bulletHoleGraphic;
+    */
+    public TextMeshProUGUI ammoText;
+    public bool gunEquipped;
+
+    // End of Gun System
+    [SerializeField]
+    private int scoreFromZombiePart;
+
+    //[SerializeField] ZombieAI zombieAI;
+    //public List<ZombieAI> zombieAIList = new List<ZombieAI>();
+
 
 
     private void Awake()  //awake happens before onEnable and then after that it's start
@@ -96,15 +125,28 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void OnEnable()
+    private void Start()
     {
-        shootAction.performed += _ => ShootGun();
+        bulletsLeft = magazineSize;
+        readyToShoot = true;
+    }
+
+    // ************** Might Delete code below if not useful
+    /*private void OnEnable()
+    {
+        if(!allowButtonHold)
+        {
+            shootAction.performed += _ => ShootGun();
+        }
     }
 
     private void OnDisable()
     {
-        shootAction.performed -= _ => ShootGun();
-    }
+        if (!allowButtonHold)
+        {
+            shootAction.performed -= _ => ShootGun();
+        }
+    }*/
 
     /// <summary>
     /// Spawn a bullet and shoot in the direction of the gun barrel. If the raycast hits the environment,
@@ -113,6 +155,21 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void ShootGun()
     {
+        readyToShoot = false;
+
+        /*
+        // Spread
+        float x = Random.Range(-spread, spread);
+        float y = Random.Range(-spread, spread);
+
+        // Calculate Direction with Spread
+        Vector3 direction = cameraTransform.forward + new Vector3(x, y, 0);
+        // Replace cameraTransform.forward if you want to use Spread. I'm not sure that it'll work.
+        */
+
+        // Muzzle Flash
+        //Instantiate(muzzleFlash, barrelTransform.position, Quaternion.identity);
+
         RaycastHit hit;
         GameObject bullet = GameObject.Instantiate(bulletPrefab, barrelTransform.position, Quaternion.identity, bulletParent);
         BulletController bulletController = bullet.GetComponent<BulletController>();
@@ -122,21 +179,29 @@ public class PlayerController : MonoBehaviour
             bulletController.hit = true;
 
             //checkHIT(hit);
-
+            ZombieAI zombieAI = hit.collider.transform.root.gameObject.GetComponent<ZombieAI>();
+           
             if (hit.collider.CompareTag("EnemyHead"))
             {
                 Debug.Log("hit HEAD!!");
-                takeDamage.instance.enemyTakeDamage(bulletDamageAmount);
+                zombieAI.enemyTakeDamage(bulletDamageAmount);
+                ScoreSystem.instance.AddScore(scoreFromZombiePart);
+                if(zombieAI.health <= 0)
+                {
+                    CountdownTimer.Instance.AddTime();
+                }
             }
             if (hit.collider.CompareTag("EnemyBody"))
             {
                 Debug.Log("hit BODY!!");
-                takeDamage.instance.enemyTakeDamage(bulletDamageAmount / 2);
+                zombieAI.enemyTakeDamage(bulletDamageAmount / 2);
+                ScoreSystem.instance.AddScore(scoreFromZombiePart / 4);
             }
             if (hit.collider.CompareTag("EnemyArms"))
             {
                 Debug.Log("hit ARMS!!");
-                takeDamage.instance.enemyTakeDamage(bulletDamageAmount / 4);
+                zombieAI.enemyTakeDamage(bulletDamageAmount / 4);
+                ScoreSystem.instance.AddScore(scoreFromZombiePart / 10);
             }
         }
         else
@@ -147,6 +212,14 @@ public class PlayerController : MonoBehaviour
         animator.CrossFade(recoilAnimation, animationPlayTransition);
         //CinemachineShake.Instance.ShakeCamera(1f, .25f);  ****this is for melee, Maybe
         recoilShake.ScreenShake();
+        
+        bulletsLeft--;
+        bulletsShot--;
+
+        Invoke("ResetShot", timeBetweenShooting);
+
+        if(bulletsShot > 0 && bulletsLeft > 0)
+            Invoke("ShootGun", timeBetweenShots);
     }
 
     void Update()
@@ -181,6 +254,7 @@ public class PlayerController : MonoBehaviour
 
         }
 
+
         // Blend Strafe Animation.
         animator.SetFloat(moveXAnimationParameterID, currentAnimationBlendVector.x);
         animator.SetFloat(moveZAnimationParameterID, currentAnimationBlendVector.y);
@@ -201,10 +275,34 @@ public class PlayerController : MonoBehaviour
         // When runnning, I want to be able to use the "else" statement in the UpdateTargetDirection()
         // Rotate towards camera direction.
         
-
         
         UpdateTargetDirection();
         
+
+        if(allowButtonHold)
+        {
+            shooting = shootAction.IsPressed();
+        }
+        else
+        {
+            shooting = shootAction.triggered;
+        }
+
+        if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && !reloading)
+        {
+            Reload();
+        }
+
+        // Shoot
+        if(gunEquipped && readyToShoot && shooting && !reloading && bulletsLeft > 0)
+        {
+            bulletsShot = bulletsPerTap;
+            ShootGun();
+        }
+
+        // SetText
+        ammoText.SetText(bulletsLeft + " / " + magazineSize);
+
     }
 
 
@@ -260,6 +358,23 @@ public class PlayerController : MonoBehaviour
     {
         controller.Move(move * Time.deltaTime * playerWalkSpeed);
 
+    }
+
+    public void ResetShot()
+    {
+        readyToShoot = true;
+    }
+
+    private void Reload()
+    {
+        reloading = true;
+        Invoke("ReloadFinished", reloadTime);
+    }
+
+    public void ReloadFinished()
+    {
+        bulletsLeft = magazineSize;
+        reloading = false;
     }
 
     /*private void checkHIT(RaycastHit hit)
