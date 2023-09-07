@@ -890,6 +890,7 @@ MonoBehaviour:
   gunEquipped: 0
   scoreFromZombiePart: 100
   playerHealth: 100
+  healthSlider: {fileID: 1788466943}
 --- !u!143 &220380086
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1238,7 +1239,7 @@ PrefabInstance:
     - target: {fileID: 5279583508967888443, guid: 4617729b44655824ea3f87e1ea7e14c5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.30282322
+      value: 0.35658082
       objectReference: {fileID: 0}
     - target: {fileID: 5279583508967888443, guid: 4617729b44655824ea3f87e1ea7e14c5,
         type: 3}
@@ -3249,7 +3250,7 @@ Transform:
   m_GameObject: {fileID: 961739749}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32326594, y: 0, z: 0, w: 0.94630814}
-  m_LocalPosition: {x: 0.7618722, y: 3.6027873, z: -2.229328}
+  m_LocalPosition: {x: 0.8971208, y: 3.6027873, z: -2.229328}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3381,7 +3382,7 @@ PrefabInstance:
     - target: {fileID: 5279583508967888443, guid: 4617729b44655824ea3f87e1ea7e14c5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.7618722
+      value: 0.8971208
       objectReference: {fileID: 0}
     - target: {fileID: 5279583508967888443, guid: 4617729b44655824ea3f87e1ea7e14c5,
         type: 3}
@@ -5530,7 +5531,7 @@ GameObject:
   - component: {fileID: 1788466942}
   - component: {fileID: 1788466943}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: HealthSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

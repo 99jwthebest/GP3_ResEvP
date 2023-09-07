@@ -93,7 +93,54 @@ public class ZombieAI : MonoBehaviour
                 }
             }
         }
+
+        //bool shouldChasePlayer = false;
+
+        //float targetDistance = Vector3.Distance(transform.position, targetPos.position);
+        //if (shouldChasePlayer)
+        //{
+        //    enemy_NavMeshAgent.destination = targetPos.position;
+
+        //    if (targetDistance <= attackRange && canAttack == true)
+        //    {
+        //        // Attack player
+        //        canAttack = false;
+        //        //enemy_Animator.SetInteger("AttackIndex", Random.Range(0, 7));
+        //        enemy_Animator.SetTrigger("Attack");
+        //    }
+        //}
+        //else
+        //{
+        //    if (targetDistance <= followRange)
+        //    {
+        //        enemy_NavMeshAgent.destination = targetPos.position;
+
+        //        if (targetDistance <= attackRange && canAttack == true)
+        //        {
+        //            // Attack player
+        //            canAttack = false;
+        //            //enemy_Animator.SetInteger("AttackIndex", Random.Range(0, 7));
+        //            enemy_Animator.SetTrigger("Attack");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // Waypoints
+        //        float waypointDistance = Vector3.Distance(transform.position, waypoints[waypointIndex].transform.position);
+        //        enemy_NavMeshAgent.destination = waypoints[waypointIndex].transform.position;
+        //        if (waypointDistance < enemy_NavMeshAgent.stoppingDistance + 0.5f)
+        //        {
+        //            waypointIndex++;
+        //            if (waypointIndex >= waypoints.Length)
+        //            {
+        //                waypointIndex = 0;
+        //            }
+        //        }
+        //    }
+        //}
     }
+
+
 
     public void EnemyDie(GameObject enemyObject)
     {

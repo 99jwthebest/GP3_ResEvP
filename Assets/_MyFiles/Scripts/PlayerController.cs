@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
 using TMPro;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(CharacterController), typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
@@ -99,7 +100,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private int scoreFromZombiePart;
     [SerializeField]
-    private int playerHealth;
+    private int playerHealth = 100;
+    [SerializeField]
+    private int currentPHealth;
+    public Slider healthSlider;
 
 
     private void Awake()  //awake happens before onEnable and then after that it's start
@@ -120,6 +124,8 @@ public class PlayerController : MonoBehaviour
         recoilAnimation = Animator.StringToHash("PistolShootRecoil");
         moveXAnimationParameterID = Animator.StringToHash("MoveX");
         moveZAnimationParameterID = Animator.StringToHash("MoveZ");
+        currentPHealth = playerHealth;
+        SetMaxHealth(playerHealth);
 
     }
 
@@ -222,6 +228,11 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.F))
+        {
+            playerTakeDamage(10);
+        }
+
         aimTarget.position = cameraTransform.position + cameraTransform.forward * aimDistance;
 
         aimTarget.localPosition += addingForAim;
@@ -373,6 +384,25 @@ public class PlayerController : MonoBehaviour
     {
         bulletsLeft = magazineSize;
         reloading = false;
+    }
+
+    public void SetMaxHealth(int health)
+    {
+        healthSlider.maxValue = health;
+        healthSlider.value = health;
+
+    }
+
+    public void SetHealth(int health)
+    {
+        healthSlider.value = health;
+    }
+
+    public void playerTakeDamage(int amountOfDam)
+    {
+        currentPHealth -= amountOfDam;
+
+        SetHealth(currentPHealth);
     }
 
     /*private void checkHIT(RaycastHit hit)

@@ -50,6 +50,7 @@ public class PickupController : MonoBehaviour
 
     private void PickUp()
     {
+        Debug.Log("picking up");
         equipped = true;
         slotFull = true;
 
@@ -62,6 +63,7 @@ public class PickupController : MonoBehaviour
         */
         // Make Rigidbody kinematic and BoxCollider a trigger
         rb.isKinematic = true;
+
         gunCollide.isTrigger = true;
 
         // Enable Script

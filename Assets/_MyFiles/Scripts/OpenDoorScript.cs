@@ -41,7 +41,7 @@ public class OpenDoorScript : MonoBehaviour
         {
             if(Action == true)
             {
-                if(ScoreSystem.instance.TotalMoney > priceOfDoor)
+                if(ScoreSystem.instance.TotalMoney >= priceOfDoor)
                 {
                     openDoorText.SetActive(false);
                     ScoreSystem.instance.spendMoney(priceOfDoor);
