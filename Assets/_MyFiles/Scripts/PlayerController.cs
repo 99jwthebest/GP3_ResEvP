@@ -98,10 +98,8 @@ public class PlayerController : MonoBehaviour
     // End of Gun System
     [SerializeField]
     private int scoreFromZombiePart;
-
-    //[SerializeField] ZombieAI zombieAI;
-    //public List<ZombieAI> zombieAIList = new List<ZombieAI>();
-
+    [SerializeField]
+    private int playerHealth;
 
 
     private void Awake()  //awake happens before onEnable and then after that it's start
