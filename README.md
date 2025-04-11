@@ -1,4 +1,4 @@
-# RE/COD Zombies Inspired Shooter
+# Resident Evil/Black Ops Zombie TPS Inspired Game
 
 A hack-and-slash rhythm game where players must press inputs and land attacks on the beat to progress, using dynamic audio and custom shaders to enhance the experience.
 
